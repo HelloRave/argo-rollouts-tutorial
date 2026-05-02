@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-canary
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: rollout-canary
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: {}
+        - setWeight: 50
+        - pause: { duration: 10s }
+      canaryService: rollout-canary-preview
+      stableService: rollout-canary-stable
+  template:
+    metadata:
+      labels:
+        app: rollout-canary
+    spec:
+      containers:
+      - image: lmacademy/simple-color-app:1.0.0
+        name: simple-color-app
+        env:
+        - name: APP_COLOR
+          value: 'green'
